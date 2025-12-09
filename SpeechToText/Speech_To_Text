@@ -1,0 +1,65 @@
+import speech_recognition as sr
+import os
+
+def transcribe_from_microphone():
+    recognizer = sr.Recognizer()
+
+    try:
+        with sr.Microphone() as source:
+            print("🎤 Listening... Speak now.")
+            recognizer.adjust_for_ambient_noise(source)
+            audio = recognizer.listen(source)
+    except OSError:
+        print("❌ No microphone detected! Please plug one in or choose the file option.")
+        return
+
+    print("⏳ Recognizing...")
+    try:
+        text = recognizer.recognize_google(audio)
+        print("✅ You said:", text)
+    except Exception as e:
+        print("❌ Error:", e)
+
+
+def transcribe_from_file():
+    recognizer = sr.Recognizer()
+
+    file_path = input("📁 Enter the audio file path (WAV/MP3/FLAC): ")
+
+    if not os.path.exists(file_path):
+        print("❌ File not found.")
+        return
+
+    try:
+        with sr.AudioFile(file_path) as source:
+            print("🎵 Reading audio file...")
+            audio = recognizer.record(source)
+    except Exception as e:
+        print("❌ Could not read the file:", e)
+        return
+
+    print("⏳ Recognizing...")
+    try:
+        text = recognizer.recognize_google(audio)
+        print("✅ Transcription:", text)
+    except Exception as e:
+        print("❌ Error:", e)
+
+
+def main():
+    print("Choose an option:")
+    print("1: 🎤 Microphone Speech-to-Text")
+    print("2: 📁 File Speech-to-Text")
+
+    choice = input("Enter 1 or 2: ")
+
+    if choice == "1":
+        transcribe_from_microphone()
+    elif choice == "2":
+        transcribe_from_file()
+    else:
+        print("❌ Invalid choice.")
+
+
+if __name__ == "__main__":
+    main()
