@@ -1,211 +1,193 @@
-import 'package:english_words/english_words.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import 'package:video_player/video_player.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(const VideoApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class VideoApp extends StatelessWidget {
+  const VideoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (context) => MyAppState(),
-      child: MaterialApp(
-        title: 'Namer App',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
-        ),
-        home: MyHomePage(),
+    return MaterialApp(
+      title: 'Video Library',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        primarySwatch: Colors.deepPurple,
+        brightness: Brightness.dark,
       ),
+      home: const VideoHomePage(),
     );
   }
 }
 
-class MyAppState extends ChangeNotifier {
-  var current = WordPair.random();
+class VideoHomePage extends StatefulWidget {
+  const VideoHomePage({super.key});
 
-  // ↓ Add this.
-  void getNext() {
-    current = WordPair.random();
-    notifyListeners();
-  }
-
-  var favorites = <WordPair>[];
-
-  void toggleFavorite() {
-    if (favorites.contains(current)) {
-      favorites.remove(current);
-    } else {
-      favorites.add(current);
-    }
-    notifyListeners();
-  }
-}
-
-class MyHomePage extends StatefulWidget {
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<VideoHomePage> createState() => _VideoHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  var selectedIndex = 0;
+class _VideoHomePageState extends State<VideoHomePage> {
+  List<String> videoPaths = [];
+  List<String> filteredVideos = [];
+  bool loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVideos();
+  }
+
+  Future<void> _loadVideos() async {
+    final String data = await rootBundle.loadString('AI/DataBase/videos.json');
+    final Map<String, dynamic> jsonResult = json.decode(data);
+
+    List<String> paths = [];
+    for (var value in jsonResult.values) {
+      paths.addAll(List<String>.from(value));
+    }
+
+    setState(() {
+      videoPaths = paths;
+      filteredVideos = paths;
+      loading = false;
+    });
+  }
+
+  void _filterVideos(String query) {
+    setState(() {
+      filteredVideos = videoPaths
+          .where((path) => path.toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    Widget page;
-    switch (selectedIndex) {
-      case 0:
-        page = GeneratorPage();
-        break;
-      case 1:
-        page = FavoritesPage();
-        break;
-      default:
-        throw UnimplementedError('no widget for $selectedIndex');
-    }
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        return Scaffold(
-          body: Row(
-            children: [
-              SafeArea(
-                child: NavigationRail(
-                  extended: constraints.maxWidth >= 600,
-                  destinations: [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.home),
-                      label: Text('Home'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.favorite),
-                      label: Text('Favorites'),
-                    ),
-                  ],
-                  selectedIndex: selectedIndex,
-                  onDestinationSelected: (value) {
-                    setState(() {
-                      selectedIndex = value;
-                    });
-                  },
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Video Library'),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              onChanged: _filterVideos,
+              decoration: InputDecoration(
+                hintText: 'Search videos...',
+                fillColor: Colors.white10,
+                filled: true,
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              Expanded(
-                child: Container(
-                  color: Theme.of(context).colorScheme.primaryContainer,
-                  child: page,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class GeneratorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var pair = appState.current;
-
-    IconData icon;
-    if (appState.favorites.contains(pair)) {
-      icon = Icons.favorite;
-    } else {
-      icon = Icons.favorite_border;
-    }
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          BigCard(pair: pair),
-          SizedBox(height: 10),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ElevatedButton.icon(
-                onPressed: () {
-                  appState.toggleFavorite();
-                },
-                icon: Icon(icon),
-                label: Text('Like'),
-              ),
-              SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  appState.getNext();
-                },
-                child: Text('Next'),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class FavoritesPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var favorites = appState.favorites;
-
-    if (appState.favorites.isEmpty) {
-      return Center(child: Text('No favorites yet.'));
-    }
-
-    return ListView(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Text(
-            'You have '
-            '${appState.favorites.length} favorites:',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
-        ),
-        for (var pair in appState.favorites)
-          ListTile(
-            leading: Icon(Icons.favorite),
-            title: Text(
-              pair.asLowerCase,
-              style: TextStyle(fontStyle: FontStyle.italic),
             ),
           ),
-      ],
+        ),
+      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : filteredVideos.isEmpty
+              ? const Center(child: Text('No videos found'))
+              : GridView.builder(
+                  padding: const EdgeInsets.all(10),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 10,
+                    mainAxisSpacing: 10,
+                    childAspectRatio: 16 / 9,
+                  ),
+                  itemCount: filteredVideos.length,
+                  itemBuilder: (context, index) {
+                    return VideoCard(videoPath: filteredVideos[index]);
+                  },
+                ),
     );
   }
 }
 
-class BigCard extends StatelessWidget {
-  const BigCard({super.key, required this.pair});
+class VideoCard extends StatefulWidget {
+  final String videoPath;
+  const VideoCard({super.key, required this.videoPath});
 
-  final WordPair pair;
+  @override
+  State<VideoCard> createState() => _VideoCardState();
+}
+
+class _VideoCardState extends State<VideoCard> {
+  late VideoPlayerController _controller;
+  bool initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Replace invalid characters for Windows safe paths
+    String safePath = widget.videoPath.replaceAll(RegExp(r'[\\/:*?"<>|]'), '_');
+    _controller = VideoPlayerController.asset('AI/DataBase/DOWNLOADS/$safePath')
+      ..initialize().then((_) {
+        setState(() {
+          initialized = true;
+        });
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final style = theme.textTheme.displayMedium!.copyWith(
-      color: theme.colorScheme.onPrimary,
-    );
-
     return Card(
-      color: theme.colorScheme.primary,
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Text(
-          pair.asLowerCase,
-          style: style,
-          semanticsLabel: "${pair.first} ${pair.second}",
-        ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          initialized
+              ? GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _controller.value.isPlaying
+                          ? _controller.pause()
+                          : _controller.play();
+                    });
+                  },
+                  child: VideoPlayer(_controller),
+                )
+              : Container(
+                  color: Colors.black26,
+                  child: const Center(child: CircularProgressIndicator()),
+                ),
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              color: Colors.black54,
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+              child: Text(
+                widget.videoPath,
+                style: const TextStyle(fontSize: 12),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ),
+          if (initialized && !_controller.value.isPlaying)
+            const Center(
+              child: Icon(
+                Icons.play_circle_outline,
+                size: 50,
+                color: Colors.white70,
+              ),
+            ),
+        ],
       ),
     );
   }
