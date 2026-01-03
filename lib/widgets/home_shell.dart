@@ -26,47 +26,69 @@ class _HomeShellState extends State<HomeShell> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Row(
-        children: [
-          NavigationRail(
-            //extended: constraints.maxWidth >= 600,
-            selectedIndex: selectedIndex,
-            onDestinationSelected: (int index) {
-              setState(() {
-                selectedIndex = index;
-              });
-            },
+    Widget page = pages[selectedIndex];
 
-            // labelType: NavigationRailLabelType.all,
-            destinations: const [
-              NavigationRailDestination(
-                icon: Icon(Icons.home),
-                label: Text('Home'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(
+              'Sign Translate',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onPrimary,
+                fontWeight: FontWeight.bold,
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.mic),
-                label: Text('Speech'),
+            ), // The main title of the app bar
+            backgroundColor: Theme.of(context).colorScheme.primary,
+          ),
+          body: Row(
+            children: [
+              SafeArea(
+                child: NavigationRail(
+                  extended: constraints.maxWidth >= 800,
+                  minWidth: 56,
+
+                  destinations: const [
+                    NavigationRailDestination(
+                      icon: Icon(Icons.home),
+                      label: Text('Home'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.mic),
+                      label: Text('Speech'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.videocam),
+                      label: Text('Video'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.settings),
+                      label: Text('Settings'),
+                    ),
+                    NavigationRailDestination(
+                      icon: Icon(Icons.account_circle),
+                      label: Text('Profile'),
+                    ),
+                  ],
+                  selectedIndex: selectedIndex,
+                  onDestinationSelected: (int index) {
+                    setState(() {
+                      selectedIndex = index;
+                    });
+                  },
+                ),
               ),
-              NavigationRailDestination(
-                icon: Icon(Icons.videocam),
-                label: Text('Video'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.settings),
-                label: Text('Settings'),
-              ),
-              NavigationRailDestination(
-                icon: Icon(Icons.account_circle),
-                label: Text('Profile'),
+
+              Expanded(
+                child: Container(
+                  color: Theme.of(context).colorScheme.primaryContainer,
+                  child: pages[selectedIndex],
+                ),
               ),
             ],
           ),
-
-          //place for the actual pages
-          Expanded(child: pages[selectedIndex]),
-        ],
-      ),
+        );
+      },
     );
   }
 }
