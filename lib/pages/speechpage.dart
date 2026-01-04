@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:record/record.dart';
+import 'package:path_provider/path_provider.dart';
+import 'dart:io';
 
 class SpeechPage extends StatefulWidget {
   const SpeechPage({super.key});
@@ -8,38 +11,69 @@ class SpeechPage extends StatefulWidget {
 }
 
 class _SpeechPageState extends State<SpeechPage> {
-  bool isListening = false;
+  bool isRecording = false;
   bool isPaused = false;
-  String transcript = '';
+  String? filePath;
 
-  void startListening() {
+  final recorder = AudioRecorder();
+
+  Future<void> startRecording() async {
+    if (await _recorder.hasPermission()) {
+      final dir = await getApplicationDocumentsDirectory();
+      filePath =
+          '${dir.path}/recording_${DateTime.now().millisecondsSinceEpoch}.m4a';
+
+      await _recorder.start(
+        path: filePath,
+        encoder: AudioEncoder.aacLc,
+        bitRate: 128000,
+        samplingRate: 44100,
+      );
+
+      setState(() {
+        isRecording = true;
+        isPaused = false;
+      });
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Microphone permission denied')),
+      );
+    }
+  }
+
+  Future<void> pauseRecording() async {
+    if (await _recorder.isRecording()) {
+      await _recorder.pause();
+      setState(() {
+        isPaused = true;
+      });
+    }
+  }
+
+  Future<void> resumeRecording() async {
+    if (await _recorder.isPaused()) {
+      await _recorder.resume();
+      setState(() {
+        isPaused = false;
+      });
+    }
+  }
+
+  Future<void> stopRecording() async {
+    await _recorder.stop();
     setState(() {
-      isListening = true;
+      isRecording = false;
       isPaused = false;
-      // Here you would trigger actual STT start
     });
   }
 
-  void stopListening() {
-    setState(() {
-      isListening = false;
-      isPaused = false;
-      // Here you would stop STT
-    });
-  }
-
-  void pauseListening() {
-    setState(() {
-      isPaused = true;
-      // Here you would pause STT
-    });
-  }
-
-  void resumeListening() {
-    setState(() {
-      isPaused = false;
-      // Here you would resume STT
-    });
+  void clearRecording() {
+    if (filePath != null && File(filePath!).existsSync()) {
+      File(filePath!).deleteSync();
+      setState(() {
+        filePath = null;
+      });
+    }
   }
 
   @override
@@ -51,6 +85,7 @@ class _SpeechPageState extends State<SpeechPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Header
           Text(
             'Speech recognition',
             style: theme.textTheme.titleLarge?.copyWith(
@@ -60,47 +95,26 @@ class _SpeechPageState extends State<SpeechPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Turn speech to text here',
+            'Record your voice here',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(height: 24),
 
-          // Listening status row (slightly narrower than transcript)
-          Center(
-            child: FractionallySizedBox(
-              widthFactor: 0.92, // 92% width of the parent, adjust as needed
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    isListening
-                        ? (isPaused ? 'Paused' : 'Listening…')
-                        : 'Not listening',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: null,
-                    icon: const Icon(Icons.upload_file),
-                    label: const Text('Upload'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+          // Status row
+          FractionallySizedBox(
+            widthFactor: 0.92,
+            child: Text(
+              isRecording
+                  ? (isPaused ? 'Paused' : 'Recording…')
+                  : 'Not recording',
+              style: theme.textTheme.titleMedium,
             ),
           ),
-
           const SizedBox(height: 16),
-          // Transcript box
+
+          // Recording info box
           Expanded(
             child: Card(
               shape: RoundedRectangleBorder(
@@ -110,9 +124,7 @@ class _SpeechPageState extends State<SpeechPage> {
                 padding: const EdgeInsets.all(16),
                 child: SingleChildScrollView(
                   child: Text(
-                    transcript.isEmpty
-                        ? 'Your transcribed text will appear here…'
-                        : transcript,
+                    filePath ?? 'Your recording path will appear here…',
                     style: theme.textTheme.bodyLarge,
                   ),
                 ),
@@ -121,18 +133,18 @@ class _SpeechPageState extends State<SpeechPage> {
           ),
           const SizedBox(height: 16),
 
-          // Controls
+          // Controls row
           Row(
             children: [
               Expanded(
-                child: isListening
+                child: isRecording
                     ? Row(
                         children: [
                           Expanded(
                             child: ElevatedButton.icon(
                               onPressed: isPaused
-                                  ? resumeListening
-                                  : pauseListening,
+                                  ? resumeRecording
+                                  : pauseRecording,
                               icon: Icon(
                                 isPaused ? Icons.play_arrow : Icons.pause,
                               ),
@@ -150,7 +162,7 @@ class _SpeechPageState extends State<SpeechPage> {
                           const SizedBox(width: 12),
                           Expanded(
                             child: ElevatedButton.icon(
-                              onPressed: stopListening,
+                              onPressed: stopRecording,
                               icon: const Icon(Icons.stop),
                               label: const Text('Stop'),
                               style: ElevatedButton.styleFrom(
@@ -160,15 +172,16 @@ class _SpeechPageState extends State<SpeechPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
+                                backgroundColor: theme.colorScheme.error,
                               ),
                             ),
                           ),
                         ],
                       )
                     : ElevatedButton.icon(
-                        onPressed: startListening,
+                        onPressed: startRecording,
                         icon: const Icon(Icons.mic),
-                        label: const Text('Start'),
+                        label: const Text('Record'),
                         style: ElevatedButton.styleFrom(
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
@@ -179,14 +192,8 @@ class _SpeechPageState extends State<SpeechPage> {
               ),
               const SizedBox(width: 12),
               IconButton(
-                tooltip: 'Clear text',
-                onPressed: transcript.isEmpty
-                    ? null
-                    : () {
-                        setState(() {
-                          transcript = '';
-                        });
-                      },
+                tooltip: 'Clear recording',
+                onPressed: filePath == null ? null : clearRecording,
                 icon: const Icon(Icons.delete_outline),
               ),
             ],

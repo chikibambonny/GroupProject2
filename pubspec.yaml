@@ -31,6 +31,9 @@ dependencies:
   flutter:
     sdk: flutter
   package_info_plus: ^4.0.0
+  record: ^5.0.0      # check pub.dev for latest version
+  path_provider: ^2.0.17 # check pub.dev for latest version
+
   english_words: ^4.0.0
   provider: ^6.1.5
 
