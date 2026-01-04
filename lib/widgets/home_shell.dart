@@ -5,6 +5,12 @@ import 'package:sign_translate_app/pages/profilepage.dart';
 import '../pages/speechpage.dart';
 import '../pages/videopage.dart';
 import '../pages/settingspage.dart';
+import 'package:sign_translate_app/pages/homepage.dart';
+import 'package:sign_translate_app/pages/profilepage.dart';
+
+import '../pages/speechpage.dart';
+import '../pages/videopage.dart';
+import '../pages/settingspage.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
