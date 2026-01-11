@@ -32,6 +32,16 @@ class HomePage extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
+
+              const SizedBox(height: 24),
+
+              TextField(
+                //obscureText: true,
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintText: 'Enter your email',
+                ),
+              ),
             ],
           ),
         ),
