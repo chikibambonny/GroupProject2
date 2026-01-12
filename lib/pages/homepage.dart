@@ -18,6 +18,13 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  void sendEmail() {
+    String email = myController.text;
+
+    // Example: print it
+    print('Email entered: $email');
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -52,7 +59,7 @@ class _HomePageState extends State<HomePage> {
 
               Center(
                 child: SizedBox(
-                  width: 200,
+                  width: 250,
                   child: TextField(
                     controller: myController,
                     decoration: InputDecoration(
@@ -68,6 +75,10 @@ class _HomePageState extends State<HomePage> {
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.send),
                         onPressed: () {
+                          sendEmail();
+                          myController.clear();
+                        },
+                        /* () {
                           showDialog(
                             context: context,
                             builder: (context) {
@@ -76,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                               );
                             },
                           );
-                        },
+                        }, */
                       ),
                     ),
                   ),
