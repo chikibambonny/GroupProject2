@@ -52,20 +52,20 @@ class _HomePageState extends State<HomePage> {
 
               Center(
                 child: SizedBox(
-                  width: 280, // ← pick the width you want
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: myController,
-                          decoration: const InputDecoration(
-                            border: UnderlineInputBorder(),
-                            hintText: 'Enter your email',
-                          ),
+                  width: 200,
+                  child: TextField(
+                    controller: myController,
+                    decoration: InputDecoration(
+                      border: UnderlineInputBorder(
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.primary,
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      IconButton(
+                      hintText: 'Enter your email',
+                      isDense: true,
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+
+                      suffixIcon: IconButton(
                         icon: const Icon(Icons.send),
                         onPressed: () {
                           showDialog(
@@ -78,7 +78,7 @@ class _HomePageState extends State<HomePage> {
                           );
                         },
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ),
