@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/message_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,6 +24,20 @@ class _HomePageState extends State<HomePage> {
 
     // Example: print it
     print('Email entered: $email');
+  }
+
+  void onClickEmail() async {
+    print("Clicked send email");
+    final text = myController.text;
+
+    if (text.isEmpty) return;
+
+    try {
+      await MessageService.send(text);
+      myController.clear();
+    } catch (e) {
+      print("Failed: $e");
+    }
   }
 
   @override
@@ -74,10 +89,7 @@ class _HomePageState extends State<HomePage> {
 
                       suffixIcon: IconButton(
                         icon: const Icon(Icons.send),
-                        onPressed: () {
-                          sendEmail();
-                          myController.clear();
-                        },
+                        onPressed: onClickEmail,
                         /* () {
                           showDialog(
                             context: context,

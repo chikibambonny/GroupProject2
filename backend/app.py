@@ -9,4 +9,14 @@ def message():
     return {"status": "success", "message": "Message received"}, 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)
+    print("Server is running...")
+
+
+'''
+To test this backend, you can use the following curl command:
+curl -X POST http://127.0.0.1:5000/message ^
+  -H "Content-Type: application/json" ^
+  -d "{\"text\":\"hello\"}"
+
+''' 
