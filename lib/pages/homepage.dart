@@ -35,6 +35,22 @@ class _HomePageState extends State<HomePage> {
     try {
       await MessageService.send(text);
       myController.clear();
+
+      // Show success dialog
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Success"),
+          content: const Text("Your email has been sent!"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+
     } catch (e) {
       print("Failed: $e");
     }

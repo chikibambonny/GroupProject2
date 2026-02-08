@@ -1,8 +1,12 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 
+// temp variables until a config file is created
+var SERVER_URL = "192.168.22.178";
+var SERVER_PORT = "12345";
+
 class ApiClient {
-  static const String _baseUrl = "http://192.168.137.167:5000";
+  static final String _baseUrl = "http://$SERVER_URL:$SERVER_PORT";
 
   static Future<http.Response> post(String path, Map<String, dynamic> body) {
     final url = Uri.parse("$_baseUrl$path");
