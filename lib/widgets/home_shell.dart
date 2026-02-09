@@ -19,26 +19,30 @@ class _HomeShellState extends State<HomeShell> {
 
   final List<Widget> pages = const [
     HomePage(),
-    SpeechPage(),
-    VideoPage(),
+    TranslatorPage(),
+    //SpeechPage(),
+    //VideoPage(),
     SettingsPage(),
     ProfilePage(),
-    TranslatorPage(),
   ];
 
   final List<NavigationDestination> navDestinations = const [
     NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
-    NavigationDestination(icon: Icon(Icons.mic), label: 'Speech'),
-    NavigationDestination(icon: Icon(Icons.videocam), label: 'Video'),
+    NavigationDestination(icon: Icon(Icons.translate), label: 'Translator'),
+    //NavigationDestination(icon: Icon(Icons.mic), label: 'Speech'),
+    //NavigationDestination(icon: Icon(Icons.videocam), label: 'Video'),
     NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
     NavigationDestination(icon: Icon(Icons.account_circle), label: 'Profile'),
-    NavigationDestination(icon: Icon(Icons.translate), label: 'Translator'),
   ];
 
   final List<NavigationRailDestination> railDestinations = const [
     NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
-    NavigationRailDestination(icon: Icon(Icons.mic), label: Text('Speech')),
-    NavigationRailDestination(icon: Icon(Icons.videocam), label: Text('Video')),
+    NavigationRailDestination(
+      icon: Icon(Icons.translate),
+      label: Text('Translator'),
+    ),
+    //NavigationRailDestination(icon: Icon(Icons.mic), label: Text('Speech')),
+    //NavigationRailDestination(icon: Icon(Icons.videocam), label: Text('Video')),
     NavigationRailDestination(
       icon: Icon(Icons.settings),
       label: Text('Settings'),
@@ -46,10 +50,6 @@ class _HomeShellState extends State<HomeShell> {
     NavigationRailDestination(
       icon: Icon(Icons.account_circle),
       label: Text('Profile'),
-    ),
-    NavigationRailDestination(
-      icon: Icon(Icons.translate),
-      label: Text('Translator'),
     ),
   ];
 
