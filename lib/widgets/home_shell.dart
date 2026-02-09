@@ -5,6 +5,7 @@ import '../pages/speechpage.dart';
 import '../pages/videopage.dart';
 import '../pages/settingspage.dart';
 import '../pages/profilepage.dart';
+import '../pages/translatorpage.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -22,6 +23,7 @@ class _HomeShellState extends State<HomeShell> {
     VideoPage(),
     SettingsPage(),
     ProfilePage(),
+    TranslatorPage(),
   ];
 
   final List<NavigationDestination> navDestinations = const [
@@ -30,6 +32,7 @@ class _HomeShellState extends State<HomeShell> {
     NavigationDestination(icon: Icon(Icons.videocam), label: 'Video'),
     NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
     NavigationDestination(icon: Icon(Icons.account_circle), label: 'Profile'),
+    NavigationDestination(icon: Icon(Icons.translate), label: 'Translator'),
   ];
 
   final List<NavigationRailDestination> railDestinations = const [
@@ -43,6 +46,10 @@ class _HomeShellState extends State<HomeShell> {
     NavigationRailDestination(
       icon: Icon(Icons.account_circle),
       label: Text('Profile'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.translate),
+      label: Text('Translator'),
     ),
   ];
 
