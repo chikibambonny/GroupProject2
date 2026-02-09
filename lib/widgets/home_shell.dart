@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:sign_translate_app/pages/homepage.dart';
-import 'package:sign_translate_app/pages/profilepage.dart';
 
+import '../pages/homepage.dart';
 import '../pages/speechpage.dart';
 import '../pages/videopage.dart';
 import '../pages/settingspage.dart';
-import 'package:sign_translate_app/pages/homepage.dart';
-import 'package:sign_translate_app/pages/profilepage.dart';
-
-import '../pages/speechpage.dart';
-import '../pages/videopage.dart';
-import '../pages/settingspage.dart';
+import '../pages/profilepage.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -22,7 +16,7 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int selectedIndex = 0;
 
-  final pages = const [
+  final List<Widget> pages = const [
     HomePage(),
     SpeechPage(),
     VideoPage(),
@@ -30,69 +24,115 @@ class _HomeShellState extends State<HomeShell> {
     ProfilePage(),
   ];
 
+  final List<NavigationDestination> navDestinations = const [
+    NavigationDestination(icon: Icon(Icons.home), label: 'Home'),
+    NavigationDestination(icon: Icon(Icons.mic), label: 'Speech'),
+    NavigationDestination(icon: Icon(Icons.videocam), label: 'Video'),
+    NavigationDestination(icon: Icon(Icons.settings), label: 'Settings'),
+    NavigationDestination(icon: Icon(Icons.account_circle), label: 'Profile'),
+  ];
+
+  final List<NavigationRailDestination> railDestinations = const [
+    NavigationRailDestination(icon: Icon(Icons.home), label: Text('Home')),
+    NavigationRailDestination(icon: Icon(Icons.mic), label: Text('Speech')),
+    NavigationRailDestination(icon: Icon(Icons.videocam), label: Text('Video')),
+    NavigationRailDestination(
+      icon: Icon(Icons.settings),
+      label: Text('Settings'),
+    ),
+    NavigationRailDestination(
+      icon: Icon(Icons.account_circle),
+      label: Text('Profile'),
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    Widget page = pages[selectedIndex];
+    final theme = Theme.of(context);
 
     return LayoutBuilder(
       builder: (context, constraints) {
+        final ratio = constraints.maxWidth / constraints.maxHeight;
+        final useRail = ratio >= 1.0; // landscape or wide enough → side rail
+
         return Scaffold(
           appBar: AppBar(
-            title: Text(
-              'Sign Translate',
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onPrimary,
-                fontWeight: FontWeight.bold,
-              ),
-            ), // The main title of the app bar
-            backgroundColor: Theme.of(context).colorScheme.primary,
+            title: const Text('Sign Translate'),
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: theme.colorScheme.onPrimary,
           ),
-          body: Row(
-            children: [
-              SafeArea(
-                child: NavigationRail(
-                  extended: constraints.maxWidth >= 800,
-                  minWidth: 56,
 
-                  destinations: const [
-                    NavigationRailDestination(
-                      icon: Icon(Icons.home),
-                      label: Text('Home'),
+          body: useRail
+              ? Row(
+                  children: [
+                    SafeArea(
+                      child: SizedBox(
+                        width: 160,
+                        child: NavigationRail(
+                          extended: true,
+                          minWidth: 80,
+                          selectedIndex: selectedIndex,
+                          onDestinationSelected: (index) {
+                            setState(() {
+                              selectedIndex = index;
+                            });
+                          },
+                          destinations: railDestinations,
+                          selectedIconTheme: IconThemeData(
+                            color: theme.colorScheme.primary,
+                          ),
+                          selectedLabelTextStyle: TextStyle(
+                            color: theme.colorScheme.primary,
+                          ),
+                          unselectedIconTheme: IconThemeData(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          unselectedLabelTextStyle: TextStyle(
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
                     ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.mic),
-                      label: Text('Speech'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.videocam),
-                      label: Text('Video'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.settings),
-                      label: Text('Settings'),
-                    ),
-                    NavigationRailDestination(
-                      icon: Icon(Icons.account_circle),
-                      label: Text('Profile'),
+                    Expanded(
+                      child: Container(
+                        color: theme.colorScheme.primaryContainer,
+                        child: pages[selectedIndex],
+                      ),
                     ),
                   ],
-                  selectedIndex: selectedIndex,
-                  onDestinationSelected: (int index) {
-                    setState(() {
-                      selectedIndex = index;
-                    });
-                  },
-                ),
-              ),
-
-              Expanded(
-                child: Container(
-                  color: Theme.of(context).colorScheme.primaryContainer,
+                )
+              : Container(
+                  color: theme.colorScheme.primaryContainer,
                   child: pages[selectedIndex],
                 ),
-              ),
-            ],
-          ),
+
+          bottomNavigationBar: useRail
+              ? null
+              : Theme(
+                  data: Theme.of(context).copyWith(
+                    splashColor: Colors.transparent,
+                    highlightColor: Colors.transparent,
+                  ),
+                  child: BottomNavigationBar(
+                    currentIndex: selectedIndex,
+                    onTap: (index) {
+                      setState(() {
+                        selectedIndex = index;
+                      });
+                    },
+                    type: BottomNavigationBarType.fixed,
+                    selectedItemColor: theme.colorScheme.primary,
+                    unselectedItemColor: theme.colorScheme.onSurfaceVariant,
+                    items: navDestinations
+                        .map(
+                          (d) => BottomNavigationBarItem(
+                            icon: d.icon,
+                            label: d.label,
+                          ),
+                        )
+                        .toList(),
+                  ),
+                ),
         );
       },
     );
