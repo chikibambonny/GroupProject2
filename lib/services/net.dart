@@ -1,0 +1,38 @@
+import 'dart:typed_data';
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:sign_translate_app/services/config.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+class Net{
+  late IO.Socket socket;
+  void connect(){
+    var host = Config.host;
+    var port = Config.port;
+
+    socket = IO.io('$host:$port',
+        IO.OptionBuilder()
+            .setTransports(['websocket'])
+            .disableAutoConnect()
+            .build()
+    );
+
+    socket.connect();
+
+    socket.onConnect((_) {
+      print('Connected to backend');
+    });
+  }
+  void send(String command,List<int> bytes){
+    String encoded = base64Encode(bytes);
+    String command  = "translate";
+
+    final data = {
+      'command':command,
+      'data':encoded,
+    };
+    final String jsonstr = jsonEncode(data);
+
+    socket.emit("video_event",jsonstr);
+
+  }
+}
