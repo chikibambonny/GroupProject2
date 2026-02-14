@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:sign_translate_app/services/configMob.dart';
 import '../services/message_service.dart';
+import '../services/net.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -19,21 +21,19 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void sendEmail() {
-    String email = myController.text;
-
-    // Example: print it
-    print('Email entered: $email');
-  }
-
   void onClickEmail() async {
-    print("Clicked send email");
+    Config.writeToLog("[homepage.dart]- Clicked send email");
+    final connection = Net();
+    connection.connect();
+    Config.writeToLog("[homepage.dart]- Connected");
+
     final text = myController.text;
 
     if (text.isEmpty) return;
 
     try {
-      await MessageService.send(text);
+      await connection.send(Config.EMAIL_COMMAND, text);
+      Config.writeToLog("[homepage.dart]- sent successfully: $text");
       myController.clear();
 
       // Show success dialog
@@ -41,7 +41,7 @@ class _HomePageState extends State<HomePage> {
         context: context,
         builder: (context) => AlertDialog(
           title: const Text("Success"),
-          content: const Text("Your email has been sent!"),
+          content: const Text("Your email has been saved!"),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -50,9 +50,8 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       );
-
     } catch (e) {
-      print("Failed: $e");
+      Config.writeToLog("[homepage.dart]- Failed to save email: $e");
     }
   }
 
