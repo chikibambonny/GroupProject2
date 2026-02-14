@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:sign_translate_app/services/config.dart';
+import 'package:sign_translate_app/services/configMob.dart';
 import 'widgets/home_shell.dart';
 
 void main() {
@@ -11,7 +11,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Config.loadConfig();
+    // Config.loadConfig();
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Sign Translator',

@@ -1,5 +1,5 @@
 from flask import Flask, request
-
+from RestApi import main,Data
 # temp variables until a config file is created
 SERVER_URL = "192.168.22.178"
 SERVER_PORT = 12345
@@ -13,6 +13,7 @@ def message():
     return {"status": "success", "message": "Message received"}, 200
 
 if __name__ == '__main__':
+    main(app)
     app.run(host="0.0.0.0", port=SERVER_PORT, debug=True)
     print("Server is running...")
 
