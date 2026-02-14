@@ -56,5 +56,5 @@ def main(app:Flask):
 
 
 if __name__ == '__main__':
-    th1 = threading.Thread(target=main,args=(app),daemon=True)
+    th1 = threading.Thread(target='main',args=(app),daemon=True)
     th1.run()
