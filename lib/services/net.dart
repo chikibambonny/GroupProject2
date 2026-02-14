@@ -43,11 +43,11 @@ class Net {
     final String jsonstr = jsonEncode(data);
 
     try {
-      socket.emit("video_event", jsonstr);
-      Config.writeToLog("[net.dart]- emitted video_event with data: $jsonstr");
+      socket.emit("$command", jsonstr);
+      Config.writeToLog("[net.dart]- emitted $command with data: $jsonstr");
       return true;
     } catch (e) {
-      Config.writeToLog("[net.dart]- Failed to emit video_event: $e");
+      Config.writeToLog("[net.dart]- Failed to emit $command: $e");
       return false;
     }
   }

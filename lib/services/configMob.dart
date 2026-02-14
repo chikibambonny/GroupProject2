@@ -8,7 +8,7 @@ class Config {
   static String port = "12345";
 
   // COMMANDS
-  static const EMAIL_COMMAND = "email";
+  static const EMAIL_COMMAND = "email_event";
 
   static void writeToLog(String message) {
     //final logFile = File('Mobile.log');

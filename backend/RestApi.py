@@ -17,6 +17,16 @@ class RestApi(Namespace):
         self.out_q:queue.Queue = queue.Queue()
         super().__init__(namespace)
 
+    def on_connect(self):
+        print("Client connected:", request.sid)
+
+    def on_email_event(self, data):
+        print("Email event received:", data)  # Print to the server console
+        if not data or 'data' not in data:
+            return
+        print("Email event received:", data['data'])  # Print to the server console
+    
+    '''
     def on_video_event(self, data):
         if not data or 'data' not in data or 'command' not in data:
             return
@@ -24,6 +34,7 @@ class RestApi(Namespace):
         video_bytes:bytes = base64.b64decode(base64_string)
         sid = request.sid
         self.out_q.put(Task(data['command'],video_bytes,sid))
+        '''
 
     def response(self,response:Data):
         emit(response.event,response.data,room=response.sid)
