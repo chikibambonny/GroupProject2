@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:sign_translate_app/servicesOLD/configMob.dart';
 import 'widgets/home_shell.dart';
 
 void main() {

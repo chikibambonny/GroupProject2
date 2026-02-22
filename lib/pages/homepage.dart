@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:sign_translate_app/servicesOLD/configMob.dart';
-import '../servicesOLD/message_service.dart';
-import '../servicesOLD/net.dart';
+import '../services/api_config.dart';
+import '../services/api_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -22,18 +21,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void onClickEmail() async {
-    Config.writeToLog("[homepage.dart]- Clicked send email");
-    final connection = Net();
-    connection.connect();
-    Config.writeToLog("[homepage.dart]- Connected");
-
+    writeToLog("[homepage.dart]- Clicked send email");
     final text = myController.text;
 
     if (text.isEmpty) return;
-
     try {
-      await connection.send(Config.EMAIL_COMMAND, text);
-      Config.writeToLog("[homepage.dart]- sent successfully: $text");
+      await sendRequest(Command.email, {"email": text});
+      writeToLog("[homepage.dart]- sent successfully: $text");
       myController.clear();
 
       // Show success dialog
@@ -51,7 +45,7 @@ class _HomePageState extends State<HomePage> {
         ),
       );
     } catch (e) {
-      Config.writeToLog("[homepage.dart]- Failed to save email: $e");
+      writeToLog("[homepage.dart]- Failed to save email: $e");
     }
   }
 
