@@ -1,7 +1,7 @@
 const String host = "192.168.22.178";
 const String port = "8000";
 
-enum Command { email, video, image }
+enum Command { email, video, audio }
 
 final String baseUrl = "http://$host:$port";
 

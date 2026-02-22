@@ -1,4 +1,4 @@
-async def process_text(content: str) -> str:
+async def process_email(content: str) -> str:
     # Todo: replace with real logic
     return content.upper()
 
