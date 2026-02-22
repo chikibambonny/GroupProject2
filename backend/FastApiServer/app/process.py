@@ -1,6 +1,6 @@
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException
 from app import processor
-from app import TextRequest, ProcessResponse
+from app.schemas import TextRequest, ProcessResponse
 
 router = APIRouter()
 

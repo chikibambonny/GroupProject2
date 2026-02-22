@@ -1,7 +1,5 @@
-from pydantic import BaseSettings
+SERVER_IP = "0.0.0.0"
+SERVER_PORT = 8000
 
-class Settings(BaseSettings):
-    app_name: str = "Server Processing API"
-    debug: bool = True
-
-settings = Settings()
+APP_NAME = "Server Processing API"
+ISDEBUG = True
