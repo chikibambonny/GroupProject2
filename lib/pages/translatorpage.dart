@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import '../services/api_config.dart';
 import '../services/api_service.dart';
@@ -10,69 +11,55 @@ class TranslatorPage extends StatefulWidget {
 }
 
 class _TranslatorPageState extends State<TranslatorPage> {
-  /// The translation text returned from the server
   String? translationResult;
-
-  /// What we sent to the server ("audio" or "signs")
   String? lastCommand;
-
-  /// Whether we are currently waiting for a response
   bool isLoading = false;
 
   /// This function is called by ALL buttons.
-  /// `command` is exactly what your server expects.
-  void _handleAction(String command) async {
+  Future<void> _handleAction({
+    required Command command,
+    String? text,
+    Uint8List? fileBytes,
+    String? filename,
+  }) async {
+    writeToLog("[translatorpage.dart]- called action for command '$command'");
+
     setState(() {
       isLoading = true;
-      lastCommand = command;
+      lastCommand = command.name;
       translationResult = null;
     });
 
-    setState(() {
-      isLoading = false;
-      translationResult = 'Fake translation result for "$command"';
-    });
-  }
-
-  void onClickTest() async {
-    writeToLog("[translatorpage.dart]- Clicked test");
-    setState(() {
-      isLoading = true;
-    });
-
-    const text = "tralalela";
-    if (text.isEmpty) return;
     try {
-      final response = await sendRequest(Command.test, {"content": text});
-      writeToLog("[translatorpage.dart]- sent successfully: $text");
+      Map<String, dynamic> response;
+
+      // Commands that send JSON body
+      if (command == Command.email || command == Command.test) {
+        if (text == null || text.isEmpty) {
+          throw Exception("No text provided for $command");
+        }
+        response = await sendRequest(command, {"content": text});
+      } else {
+        // Commands that send files
+        if (fileBytes == null || filename == null) {
+          throw Exception("No file provided for $command");
+        }
+
+        response = await sendFile(command, fileBytes, filename);
+      }
+
       writeToLog("[translatorpage.dart]- server response: $response");
 
-      final result = response['result'];
-
       setState(() {
-        translationResult = result;
-        lastCommand = Command.test.name;
+        translationResult = response['result'];
         isLoading = false;
       });
-
-      // Show success dialog
-      '''
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Success"),
-          content: const Text("Your test has been sent!"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-      ''';
     } catch (e) {
-      writeToLog("[translatorpage.dart]- Failed to send test: $e");
+      writeToLog("[translatorpage.dart]- Failed action '$command': $e");
+      setState(() {
+        translationResult = "Failed: $e";
+        isLoading = false;
+      });
     }
   }
 
@@ -99,14 +86,17 @@ class _TranslatorPageState extends State<TranslatorPage> {
                       child: _ActionButton(
                         label: 'Stupid test',
                         icon: Icons.cruelty_free,
-                        onTap: onClickTest,
+                        onTap: () => _handleAction(
+                          command: Command.test,
+                          text: "tralalela",
+                        ),
                       ),
                     ),
                     Expanded(
                       child: _ActionButton(
                         label: 'Speaking file',
                         icon: Icons.upload_file,
-                        onTap: () => _handleAction('audio'),
+                        onTap: () => _handleAction(command: Command.audio),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -114,7 +104,7 @@ class _TranslatorPageState extends State<TranslatorPage> {
                       child: _ActionButton(
                         label: 'Signs file',
                         icon: Icons.upload_file,
-                        onTap: () => _handleAction('signs'),
+                        onTap: () => _handleAction(command: Command.video),
                       ),
                     ),
                   ],
@@ -131,7 +121,7 @@ class _TranslatorPageState extends State<TranslatorPage> {
                       child: _ActionButton(
                         label: 'Audio',
                         icon: Icons.mic,
-                        onTap: () => _handleAction('audio'),
+                        onTap: () => _handleAction(command: Command.audio),
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -139,7 +129,7 @@ class _TranslatorPageState extends State<TranslatorPage> {
                       child: _ActionButton(
                         label: 'Video',
                         icon: Icons.videocam,
-                        onTap: () => _handleAction('signs'),
+                        onTap: () => _handleAction(command: Command.video),
                       ),
                     ),
                   ],
@@ -222,3 +212,49 @@ class _ActionButton extends StatelessWidget {
     );
   }
 }
+
+/*
+
+  void onClickTest() async {
+    writeToLog("[translatorpage.dart]- Clicked test");
+    setState(() {
+      isLoading = true;
+    });
+
+    const text = "tralalela";
+    if (text.isEmpty) return;
+    try {
+      final response = await sendRequest(Command.test, {"content": text});
+      writeToLog("[translatorpage.dart]- sent successfully: $text");
+      writeToLog("[translatorpage.dart]- server response: $response");
+
+      final result = response['result'];
+
+      setState(() {
+        translationResult = result;
+        lastCommand = Command.test.name;
+        isLoading = false;
+      });
+
+      // Show success dialog
+      '''
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Success"),
+          content: const Text("Your test has been sent!"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+      ''';
+    } catch (e) {
+      writeToLog("[translatorpage.dart]- Failed to send test: $e");
+    }
+  }
+
+*/
