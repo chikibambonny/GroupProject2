@@ -12,7 +12,7 @@ void writeToLog(String message) {
 
 final String baseUrl = "http://$host:$port";
 
-enum Command { email, video, audio }
+enum Command { email, video, audio, test }
 
 String processPath(Command command) {
   return "/process/${command.name}";

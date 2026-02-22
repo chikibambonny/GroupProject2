@@ -24,6 +24,11 @@ async def process_video(file: UploadFile = File(...)):
     result = await processor.process_video(content)
     return ProcessResponse(status="success", result=result)
 
+@router.post("/test", response_model=ProcessResponse)
+async def process_test(request: TextRequest):
+    result = await processor.process_test(request.content)
+    return ProcessResponse(status="success", result=result)
+
 
 '''
 @router.post(Routes.EMAIL, response_model=ProcessResponse)

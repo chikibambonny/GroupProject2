@@ -10,6 +10,7 @@ class Command(str, Enum):
     email = "email"
     video = "video"
     audio = "audio"
+    test = "test"
 
 
 class Routes:
@@ -18,3 +19,4 @@ class Routes:
     EMAIL = f"{PROCESS_PREFIX}/{Command.email}"
     VIDEO = f"{PROCESS_PREFIX}/{Command.video}"
     AUDIO = f"{PROCESS_PREFIX}/{Command.audio}"
+    TEST = f"{PROCESS_PREFIX}/{Command.test}"

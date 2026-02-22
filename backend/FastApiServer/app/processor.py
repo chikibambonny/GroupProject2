@@ -11,3 +11,6 @@ async def process_audio(file_bytes: bytes) -> str:
 async def process_video(file_bytes: bytes) -> str:
     # TOdO: video processing logic
     return "video processed"
+
+async def process_test(content: str) -> str:
+    return f"R u slow on purpose? {content}"

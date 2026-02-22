@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../services/api_config.dart';
+import '../services/api_service.dart';
 
 class TranslatorPage extends StatefulWidget {
   const TranslatorPage({super.key});
@@ -26,18 +28,52 @@ class _TranslatorPageState extends State<TranslatorPage> {
       translationResult = null;
     });
 
-    // TODO:
-    // 1. Pick or record file
-    // 2. Send HTTP request with `command`
-    // 3. Parse server response
-
-    // Fake delay to simulate server call
-    await Future.delayed(const Duration(seconds: 2));
-
     setState(() {
       isLoading = false;
       translationResult = 'Fake translation result for "$command"';
     });
+  }
+
+  void onClickTest() async {
+    writeToLog("[translatorpage.dart]- Clicked test");
+    setState(() {
+      isLoading = true;
+    });
+
+    const text = "tralalela";
+    if (text.isEmpty) return;
+    try {
+      final response = await sendRequest(Command.test, {"content": text});
+      writeToLog("[translatorpage.dart]- sent successfully: $text");
+      writeToLog("[translatorpage.dart]- server response: $response");
+
+      final result = response['result'];
+
+      setState(() {
+        translationResult = result;
+        lastCommand = Command.test.name;
+        isLoading = false;
+      });
+
+      // Show success dialog
+      '''
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Success"),
+          content: const Text("Your test has been sent!"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+      ''';
+    } catch (e) {
+      writeToLog("[translatorpage.dart]- Failed to send test: $e");
+    }
   }
 
   @override
@@ -59,6 +95,13 @@ class _TranslatorPageState extends State<TranslatorPage> {
                 const SizedBox(height: 8),
                 Row(
                   children: [
+                    Expanded(
+                      child: _ActionButton(
+                        label: 'Stupid test',
+                        icon: Icons.cruelty_free,
+                        onTap: onClickTest,
+                      ),
+                    ),
                     Expanded(
                       child: _ActionButton(
                         label: 'Speaking file',
