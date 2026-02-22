@@ -3,3 +3,4 @@ SERVER_PORT = 8000
 
 APP_NAME = "Server Processing API"
 ISDEBUG = True
+

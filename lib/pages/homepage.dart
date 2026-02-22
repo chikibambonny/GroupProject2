@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:sign_translate_app/services/configMob.dart';
-import '../services/message_service.dart';
-import '../services/net.dart';
+import 'package:sign_translate_app/servicesOLD/configMob.dart';
+import '../servicesOLD/message_service.dart';
+import '../servicesOLD/net.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
