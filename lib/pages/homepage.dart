@@ -26,7 +26,7 @@ class _HomePageState extends State<HomePage> {
 
     if (text.isEmpty) return;
     try {
-      await sendRequest(Command.email, {"email": text});
+      await sendRequest(Command.email, {"content": text});
       writeToLog("[homepage.dart]- sent successfully: $text");
       myController.clear();
 
