@@ -7,6 +7,37 @@ import wave
 import json
 from pathlib import Path
 import os
+import subprocess
+import tempfile
+from pathlib import Path
+
+
+def convert_to_mono_16k(input_path: str) -> str:
+    """
+    Convert any audio/video file to mono 16kHz WAV using FFmpeg.
+    Returns the path to the converted WAV file.
+    """
+    input_path = Path(input_path)
+    output_file = tempfile.mktemp(suffix=".wav")  # temporary WAV file
+
+    cmd = [
+        "ffmpeg",
+        "-y",                 # overwrite if exists
+        "-i", str(input_path),
+        "-ac", "1",           # mono
+        "-ar", "16000",       # 16kHz
+        "-vn",                # drop video stream if any
+        "-f", "wav",
+        output_file
+    ]
+
+    try:
+        subprocess.run(cmd, check=True, capture_output=True)
+        return output_file
+    except subprocess.CalledProcessError as e:
+        print("FFmpeg error:", e.stderr.decode())
+        raise
+
 
 
 # Path to your Vosk model
@@ -17,8 +48,25 @@ print("Contents:", os.listdir(MODEL_PATH))
 model = Model(MODEL_PATH)
 
 def transcribe_audio_bytes(file_bytes: bytes) -> str:
+    wav_file = convert_to_mono_16k(file_bytes)
+
+    with wave.open(wav_file, "rb") as wf:
+        rec = KaldiRecognizer(model, wf.getframerate())
+        result = ""
+        while True:
+            data = wf.readframes(4000)
+            if len(data) == 0:
+                break
+            if rec.AcceptWaveform(data):
+                result += rec.Result()
+        result += rec.FinalResult()
+        return result.strip()
 
 
+
+
+
+    '''
     wf = wave.open(io.BytesIO(file_bytes), "rb")
     print("Channels:", wf.getnchannels())
     print("Sample width:", wf.getsampwidth())
@@ -50,16 +98,10 @@ def transcribe_audio_bytes(file_bytes: bytes) -> str:
 
 
 
-    """
+    
     Accepts audio or video bytes (wav, mp4, m4a),
     converts to PCM WAV, and returns transcribed text.
-    """
-
-
-
-
-
-    '''
+    
     # Convert input bytes to AudioSegment
     audio = AudioSegment.from_file(BytesIO(file_bytes))
 

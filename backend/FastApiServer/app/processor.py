@@ -1,4 +1,6 @@
-from .features.SpeechToText import EnglishScript as EngSpeach
+
+from app.features.SpeechToText import EnglishScript as EngSpeach
+from app.features.SpeechToText import TestSpeechToText
 
 async def process_email(content: str) -> str:
     # Todo: replace with real logic
@@ -7,7 +9,9 @@ async def process_email(content: str) -> str:
 
 async def process_audio(file_bytes: bytes) -> str:
     # TODo: audio processing logic
-    return EngSpeach.transcribe_audio_bytes(file_bytes)
+    #return EngSpeach.transcribe_audio_bytes(file_bytes)
+    print(dir(TestSpeechToText))
+    return TestSpeechToText.recognize_audio_bytes(file_bytes)
 
 
 async def process_video(file_bytes: bytes) -> str:
