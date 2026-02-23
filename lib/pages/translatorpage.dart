@@ -64,6 +64,34 @@ class _TranslatorPageState extends State<TranslatorPage> {
     }
   }
 
+  // =================== FILE PICKER ===================
+  Future<void> _pickAndSendFile(Command command) async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType
+            .any, // you can also restrict to FileType.audio or FileType.video
+        withData: true, // ensures we get Uint8List
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      if (file.bytes == null) throw Exception("File data is null");
+
+      await _handleAction(
+        command: command,
+        fileBytes: file.bytes,
+        filename: file.name,
+      );
+    } catch (e) {
+      writeToLog("[translatorpage.dart]- File picking failed: $e");
+      setState(() {
+        translationResult = "Failed to pick file: $e";
+      });
+    }
+  }
+
+  // =============== UI ===============
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,7 +125,8 @@ class _TranslatorPageState extends State<TranslatorPage> {
                       child: _ActionButton(
                         label: 'Speaking file',
                         icon: Icons.upload_file,
-                        onTap: () => _handleAction(command: Command.audio),
+                        //onTap: () => _handleAction(command: Command.audio),
+                        onTap: () => _pickAndSendFile(Command.audio),
                       ),
                     ),
                     const SizedBox(width: 12),
