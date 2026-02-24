@@ -46,3 +46,18 @@ app.*.map.json
 
 # Ignore Python virtual environment
 backend/venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Flutter build folders
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+pubspec.lock
+
+# OS files
+.DS_Store
+Thumbs.db
