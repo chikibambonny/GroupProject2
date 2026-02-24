@@ -1,6 +1,8 @@
+from unittest import result
 
 from app.features.SpeechToText import EnglishScript as EngSpeach
 from app.features.SpeechToText import TestSpeechToText
+from app.features.SignsToText import SignsScript
 
 async def process_email(content: str) -> str:
     # Todo: replace with real logic
@@ -15,8 +17,8 @@ async def process_audio(file_bytes: bytes) -> str:
 
 
 async def process_video(file_bytes: bytes) -> str:
-    # TOdO: video processing logic
-    return "video processed"
+    result = SignsScript.predict_sign_from_video_bytes(file_bytes)
+    return result
 
 async def process_test(content: str) -> str:
     return f"R u slow on purpose? {content}"

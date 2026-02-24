@@ -1,3 +1,8 @@
+# Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+# & C:/Users/almel/Kodcode/GroupProject/FlutterSignsAttempt2/flutter_application_1/backend/venv/Scripts/Activate.ps1
+# cd backend/FastApiServer
+# uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+
 # flutter_application_1
 
 A new Flutter project.
