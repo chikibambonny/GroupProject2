@@ -64,7 +64,7 @@ class _HomeShellState extends State<HomeShell> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Sign Translate'),
+            title: const Text('HandsUP'),
             backgroundColor: theme.colorScheme.primary,
             foregroundColor: theme.colorScheme.onPrimary,
           ),

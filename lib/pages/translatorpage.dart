@@ -16,15 +16,12 @@ class _TranslatorPageState extends State<TranslatorPage> {
   String? lastCommand;
   bool isLoading = false;
 
-  /// This function is called by ALL buttons.
   Future<void> _handleAction({
     required Command command,
     String? text,
     Uint8List? fileBytes,
     String? filename,
   }) async {
-    writeToLog("[translatorpage.dart]- called action for command '$command'");
-
     setState(() {
       isLoading = true;
       lastCommand = command.name;
@@ -34,29 +31,20 @@ class _TranslatorPageState extends State<TranslatorPage> {
     try {
       Map<String, dynamic> response;
 
-      // Commands that send JSON body
       if (command == Command.email || command == Command.test) {
-        if (text == null || text.isEmpty) {
-          throw Exception("No text provided for $command");
-        }
+        if (text == null || text.isEmpty) throw Exception("No text provided");
         response = await sendRequest(command, {"content": text});
       } else {
-        // Commands that send files
-        if (fileBytes == null || filename == null) {
-          throw Exception("No file provided for $command");
-        }
-
+        if (fileBytes == null || filename == null)
+          throw Exception("No file provided");
         response = await sendFile(command, fileBytes, filename);
       }
-
-      writeToLog("[translatorpage.dart]- server response: $response");
 
       setState(() {
         translationResult = response['result'];
         isLoading = false;
       });
     } catch (e) {
-      writeToLog("[translatorpage.dart]- Failed action '$command': $e");
       setState(() {
         translationResult = "Failed: $e";
         isLoading = false;
@@ -64,15 +52,9 @@ class _TranslatorPageState extends State<TranslatorPage> {
     }
   }
 
-  // =================== FILE PICKER ===================
   Future<void> _pickAndSendFile(Command command) async {
     try {
-      final result = await FilePicker.platform.pickFiles(
-        type: FileType
-            .any, // you can also restrict to FileType.audio or FileType.video
-        withData: true, // ensures we get Uint8List
-      );
-
+      final result = await FilePicker.platform.pickFiles(withData: true);
       if (result == null || result.files.isEmpty) return;
 
       final file = result.files.first;
@@ -84,14 +66,12 @@ class _TranslatorPageState extends State<TranslatorPage> {
         filename: file.name,
       );
     } catch (e) {
-      writeToLog("[translatorpage.dart]- File picking failed: $e");
       setState(() {
         translationResult = "Failed to pick file: $e";
       });
     }
   }
 
-  // =============== UI ===============
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,76 +80,36 @@ class _TranslatorPageState extends State<TranslatorPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            /// ACTION BUTTONS
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            // Round toolbar buttons
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                const Text(
-                  'Upload',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                _RoundButton(
+                  icon: Icons.mic,
+                  tooltip: 'Upload Speech',
+                  onTap: () => _pickAndSendFile(Command.audio),
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Stupid test',
-                        icon: Icons.cruelty_free,
-                        onTap: () => _handleAction(
-                          command: Command.test,
-                          text: "tralalela",
-                        ),
-                      ),
-                    ),
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Speaking file',
-                        icon: Icons.upload_file,
-                        //onTap: () => _handleAction(command: Command.audio),
-                        onTap: () => _pickAndSendFile(Command.audio),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Signs file',
-                        icon: Icons.upload_file,
-                        onTap: () => _handleAction(command: Command.video),
-                      ),
-                    ),
-                  ],
+                _RoundButton(
+                  icon: Icons.videocam,
+                  tooltip: 'Upload Signs',
+                  onTap: () => _pickAndSendFile(Command.video),
                 ),
-                const SizedBox(height: 20),
-                const Text(
-                  'Record',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                _RoundButton(
+                  icon: Icons.mic_none,
+                  tooltip: 'Microphone (demo)',
+                  onTap: () {},
                 ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Audio',
-                        icon: Icons.mic,
-                        onTap: () => _handleAction(command: Command.audio),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _ActionButton(
-                        label: 'Video',
-                        icon: Icons.videocam,
-                        onTap: () => _handleAction(command: Command.video),
-                      ),
-                    ),
-                  ],
+                _RoundButton(
+                  icon: Icons.camera_alt,
+                  tooltip: 'Camera (demo)',
+                  onTap: () {},
                 ),
               ],
             ),
 
             const SizedBox(height: 24),
 
-            /// TRANSLATION OUTPUT
+            // Response / translation field
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -212,79 +152,38 @@ class _TranslatorPageState extends State<TranslatorPage> {
   }
 }
 
-/// Simple reusable button used everywhere above
-class _ActionButton extends StatelessWidget {
-  final String label;
+/// Small round button used in toolbar
+class _RoundButton extends StatelessWidget {
   final IconData icon;
+  final String tooltip;
   final VoidCallback onTap;
 
-  const _ActionButton({
-    required this.label,
+  const _RoundButton({
     required this.icon,
+    required this.tooltip,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-      ),
-      onPressed: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 32),
-          const SizedBox(height: 8),
-          Text(label, textAlign: TextAlign.center),
+    final theme = Theme.of(context);
+    return Ink(
+      decoration: ShapeDecoration(
+        color: theme.colorScheme.primary, // uses app theme color
+        shape: const CircleBorder(),
+        shadows: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
         ],
+      ),
+      child: IconButton(
+        icon: Icon(icon, color: theme.colorScheme.onPrimary), // contrast color
+        tooltip: tooltip,
+        onPressed: onTap,
       ),
     );
   }
 }
-
-/*
-
-  void onClickTest() async {
-    writeToLog("[translatorpage.dart]- Clicked test");
-    setState(() {
-      isLoading = true;
-    });
-
-    const text = "tralalela";
-    if (text.isEmpty) return;
-    try {
-      final response = await sendRequest(Command.test, {"content": text});
-      writeToLog("[translatorpage.dart]- sent successfully: $text");
-      writeToLog("[translatorpage.dart]- server response: $response");
-
-      final result = response['result'];
-
-      setState(() {
-        translationResult = result;
-        lastCommand = Command.test.name;
-        isLoading = false;
-      });
-
-      // Show success dialog
-      '''
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text("Success"),
-          content: const Text("Your test has been sent!"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("OK"),
-            ),
-          ],
-        ),
-      );
-      ''';
-    } catch (e) {
-      writeToLog("[translatorpage.dart]- Failed to send test: $e");
-    }
-  }
-
-*/
