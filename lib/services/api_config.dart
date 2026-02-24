@@ -1,4 +1,4 @@
-const String host = "192.168.137.34";
+const String host = "192.168.8.158"; //"192.168.137.34";
 const String port = "8000";
 
 void writeToLog(String message) {

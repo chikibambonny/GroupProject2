@@ -35,9 +35,9 @@ def _preprocess_frame(frame: np.ndarray) -> np.ndarray:
 def _map_label_to_hebrew(label: str) -> str:
     label = label.lower()
     if "bayit" in label:
-        return "בית"
+        return "בית home"
     elif "ahava" in label:
-        return "אהבה"
+        return "אהבה love"
     return label
 
 
@@ -45,6 +45,77 @@ def _map_label_to_hebrew(label: str) -> str:
 # Public API Function
 # -----------------------------
 
+def predict_signs_from_video_bytes(
+    video_bytes: bytes,
+    confidence_threshold: float = 0.98,
+    frame_skip: int = 3,
+    min_stable_frames: int = 5,   # how many consecutive frames required to confirm a sign
+) -> list[str]:
+    """
+    Receives raw video bytes.
+    Returns list of detected Hebrew words in sequence.
+    """
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as tmp:
+        tmp.write(video_bytes)
+        tmp_path = tmp.name
+
+    cap = cv2.VideoCapture(tmp_path)
+
+    frame_index = 0
+    last_label = None
+    stable_count = 0
+    confirmed_words = []
+
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+
+        if frame_index % frame_skip != 0:
+            frame_index += 1
+            continue
+
+        processed = _preprocess_frame(frame)
+        prediction = model.predict(processed, verbose=0)
+
+        index = np.argmax(prediction)
+        confidence = float(np.max(prediction))
+
+        current_label = None
+        if confidence >= confidence_threshold:
+            label = class_names[index]
+            current_label = _map_label_to_hebrew(label)
+
+        # ---- Stability Logic ----
+        if current_label == last_label and current_label is not None:
+            stable_count += 1
+        else:
+            # If previous label was stable enough, confirm it
+            if last_label is not None and stable_count >= min_stable_frames:
+                if not confirmed_words or confirmed_words[-1] != last_label:
+                    confirmed_words.append(last_label)
+
+            stable_count = 1 if current_label is not None else 0
+
+        last_label = current_label
+        frame_index += 1
+
+    # Final check at end of video
+    if last_label is not None and stable_count >= min_stable_frames:
+        if not confirmed_words or confirmed_words[-1] != last_label:
+            confirmed_words.append(last_label)
+
+    cap.release()
+    os.remove(tmp_path)
+
+    if not confirmed_words:
+        return ""
+
+    return " ".join(confirmed_words)
+
+
+'''
 def predict_sign_from_video_bytes(
     video_bytes: bytes,
     confidence_threshold: float = 0.98,
@@ -97,3 +168,4 @@ def predict_sign_from_video_bytes(
     # Majority vote
     most_common = Counter(predictions).most_common(1)[0][0]
     return most_common
+    '''

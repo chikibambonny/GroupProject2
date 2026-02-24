@@ -17,7 +17,7 @@ async def process_audio(file_bytes: bytes) -> str:
 
 
 async def process_video(file_bytes: bytes) -> str:
-    result = SignsScript.predict_sign_from_video_bytes(file_bytes)
+    result = SignsScript.predict_signs_from_video_bytes(file_bytes)
     return result
 
 async def process_test(content: str) -> str:
